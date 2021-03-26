@@ -1,11 +1,13 @@
 from django.contrib import admin
 from django.urls import path
 
-from . import views
+from .views import getBuildigs, index,StructuralView
 
 urlpatterns = [
-    path('', views.index,name="home"),
-    
+    path('', index, name="home"),
+    path('buildings/', getBuildigs, name='Buildigs'),
+    path('structural/',StructuralView.as_view(),),
+
 ]
 
 
