@@ -22,7 +22,6 @@ class Location extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint p = Paint();
     p.color = Colors.pink;
-    canvas.drawCircle(newxy(23.03750, 72.552000), 3, p);
   }
 
   @override

@@ -25,8 +25,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   Stream<SearchState> _mapSearchLocationToState(SearchLocation event) async* {
     yield SeachingLocation();
     // call api
-    yield SearchedLocation(
-        location: LocationPoint("SEAS", 0, [23.037819, 72.554352]));
   }
 
   Stream<SearchState> _mapFindRouteToState(FindRoute event) async* {

@@ -3,20 +3,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class LocationPoint {
-  int id;
   String name;
   Offset point;
+  String website;
+  String desciption;
+  String marker;
 
-  LocationPoint(String name, int id, List<double> cor) {
-    this.name = name;
-    this.id = id;
-    this.point = newxy(cor[0], cor[1]);
-  }
+  LocationPoint(
+      this.name, this.point, this.desciption, this.marker, this.website);
 
   LocationPoint.fromJson(Map json) {
-    this.id = json["id"];
-    this.name = json["name"];
-    this.point = newxy(json["point"][0], json["point"][1]);
+    this.name = json["p_name"];
+    this.point = newxy(json["point"]["latitude"], json["point"]["longitude"]);
+    this.website = json["website"];
+    this.desciption = json["desciption"];
+    this.marker = json["marker"]["icon"];
   }
 
   void markLocation(Canvas c, Paint p) {

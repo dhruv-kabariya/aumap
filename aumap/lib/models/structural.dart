@@ -7,7 +7,6 @@ import './converter.dart';
 
 class Structural {
   String name;
-  String id;
   List<Offset> points = [];
   bool hightlight;
 
@@ -21,9 +20,9 @@ class Structural {
   Structural.fromjson(Map json) {
     this.name = json["name"];
     this.hightlight = false;
-    this.id = json["id"];
-    for (int i = 0; i < json["points"].length; i++) {
-      this.points.add(newxy(json["points"][i][0], json["points"][i][1]));
+    for (int i = 0; i < json["structural"].length; i++) {
+      this.points.add(newxy(json["structural"][i]["latitude"],
+          json["structural"][i]["longitude"]));
     }
   }
 

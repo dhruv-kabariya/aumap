@@ -1,7 +1,9 @@
+from django.db import models
 from django.db.models import fields
 from rest_framework import serializers
+from rest_framework.utils import model_meta
 
-from .models import Buildings,Coordinate,Structural
+from .models import Buildings,Coordinate, LocationPoint, Marker, Street,Structural
 
 class LatLongSerializer(serializers.ModelSerializer):
     
@@ -23,8 +25,6 @@ class StrucPointSerializer(serializers.ModelSerializer):
         fields = ['point']
         # depth=1
 
-
-
 class Buildingsserializer(serializers.ModelSerializer):
     
     structural = StrucPointSerializer(many=True,read_only=True)
@@ -33,8 +33,6 @@ class Buildingsserializer(serializers.ModelSerializer):
         model = Buildings
         fields = ['name','structural']
         depth=1
-
-
 
 class CoordinateSerializer(serializers.ModelSerializer):
 
@@ -52,3 +50,34 @@ class StructuralSerializer(serializers.ModelSerializer):
         model = Structural
         fields = ['name','point']
         depth = 1
+
+
+class StreetSerializer(serializers.ModelSerializer):
+
+    start = LatLongSerializer()
+    end = LatLongSerializer()
+
+    class Meta:
+
+        model = Street
+        fields = ["name","length","start","end"]
+        # depth =1
+
+
+class MarkerSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = Marker
+        fields =  ["types","icon"]
+
+class LoactionPointSerializer(serializers.ModelSerializer):
+
+    point = LatLongSerializer()
+    marker = MarkerSerializer()
+
+    class Meta:
+
+        model = LocationPoint
+        fields = ["p_name","point","website","desciption","marker"]
+        depth  =1

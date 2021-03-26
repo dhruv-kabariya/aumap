@@ -1,3 +1,5 @@
+import 'package:aumap/api/locationpointService.dart';
+import 'package:aumap/api/streetservice.dart';
 import 'package:aumap/api/structure_service.dart';
 import 'package:aumap/models/location_point.dart';
 import 'package:aumap/models/street.dart';
@@ -10,7 +12,9 @@ part 'loadmap_state.dart';
 class LoadmapCubit extends Cubit<LoadmapState> {
   LoadmapCubit() : super(LoadmapInitial());
 
-  final S_Service service = S_Service();
+  final BuildingService service = BuildingService();
+  final StreetService streetService = StreetService();
+  final LocationPointService locationService = LocationPointService();
 
   List<Structural> buidings = [];
   List<Street> streets = [];
@@ -19,10 +23,9 @@ class LoadmapCubit extends Cubit<LoadmapState> {
   void getMeMap() async {
     emit(Loadingmap());
 
-    Map data = await service.getMapData();
-    buidings = data["buildings"];
-    streets = data["streets"];
-    locations = data["locations"];
+    buidings = await service.getBuilldingData();
+    streets = await streetService.getStreetData();
+    locations = await locationService.getLocationPointData();
 
     emit(LoadedMap(buidings, streets, locations));
   }

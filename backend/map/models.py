@@ -92,7 +92,7 @@ class LocationPoint(models.Model):
     point = models.ForeignKey(Coordinate, on_delete=models.CASCADE)
     marker = models.ForeignKey(Marker, on_delete=models.CASCADE)
     website = models.URLField(blank=True)
-    desciption = models.TextField()
+    desciption = models.TextField(blank=True)
 
     def __str__(self):
         return self.p_name
