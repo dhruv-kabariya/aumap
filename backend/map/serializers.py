@@ -3,17 +3,19 @@ from django.db.models import fields
 from rest_framework import serializers
 from rest_framework.utils import model_meta
 
-from .models import Buildings,Coordinate, LocationPoint, Marker, Street,Structural
+from .models import Buildings, Coordinate, LocationPoint, Marker, Street, Structural
+
 
 class LatLongSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
 
-        model  = Coordinate
-        fields = ['latitude','longitude']
+        model = Coordinate
+        fields = ['latitude', 'longitude']
+
 
 class StrucPointSerializer(serializers.ModelSerializer):
-    
+
     # point = LatLongSerializer()
 
     def to_representation(self, value):
@@ -21,25 +23,28 @@ class StrucPointSerializer(serializers.ModelSerializer):
 
     class Meta:
 
-        model  = Structural
+        model = Structural
         fields = ['point']
         # depth=1
 
+
 class Buildingsserializer(serializers.ModelSerializer):
-    
-    structural = StrucPointSerializer(many=True,read_only=True)
+
+    structural = StrucPointSerializer(many=True, read_only=True)
 
     class Meta:
         model = Buildings
-        fields = ['name','structural']
-        depth=1
+        fields = ['name', 'structural']
+        depth = 1
+
 
 class CoordinateSerializer(serializers.ModelSerializer):
 
     class Meta:
 
-        model  = Coordinate
+        model = Coordinate
         fields = '__all__'
+
 
 class StructuralSerializer(serializers.ModelSerializer):
 
@@ -48,7 +53,7 @@ class StructuralSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Structural
-        fields = ['name','point']
+        fields = ['name', 'point']
         depth = 1
 
 
@@ -60,7 +65,7 @@ class StreetSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = Street
-        fields = ["name","length","start","end"]
+        fields = ["name", "length", "start", "end"]
         # depth =1
 
 
@@ -69,7 +74,8 @@ class MarkerSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = Marker
-        fields =  ["types","icon"]
+        fields = ["types", "icon"]
+
 
 class LoactionPointSerializer(serializers.ModelSerializer):
 
@@ -79,5 +85,5 @@ class LoactionPointSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = LocationPoint
-        fields = ["p_name","point","website","desciption","marker"]
-        depth  =1
+        fields = ["p_name", "point", "website", "desciption", "marker"]
+        depth = 1

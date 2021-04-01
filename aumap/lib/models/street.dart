@@ -21,7 +21,7 @@ class Street {
 
   void buildStreet(Canvas c, Paint p) {
     p.color = Colors.grey;
-    p.strokeWidth = 10;
+    p.strokeWidth = 5;
     c.drawLine(this.start, this.end, p);
   }
 }

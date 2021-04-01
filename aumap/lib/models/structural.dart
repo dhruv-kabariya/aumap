@@ -27,7 +27,17 @@ class Structural {
   }
 
   void buildStrucure(Canvas c, Paint p) {
-    c.drawPoints(PointMode.polygon, this.points, p);
-    c.drawLine(this.points.last, this.points.first, p);
+    final Paint p = Paint();
+    p.color = Colors.grey;
+
+    Path path = Path();
+    path.moveTo(points[0].dx, points[0].dy);
+    path.addPolygon(points, true);
+
+    c.drawPath(path, p);
+    // c.drawShadow(path, Colors.lightBlue, 2, true);
+
+    // c.drawPoints(PointMode.polygon, this.points, p);
+    // c.drawLine(this.points.last, this.points.first, p);
   }
 }

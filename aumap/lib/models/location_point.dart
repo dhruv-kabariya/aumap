@@ -2,6 +2,8 @@ import 'package:aumap/models/converter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'package:google_fonts/google_fonts.dart';
+
 class LocationPoint {
   String name;
   Offset point;
@@ -21,23 +23,26 @@ class LocationPoint {
   }
 
   void markLocation(Canvas c, Paint p) {
-    p.color = Colors.greenAccent;
-    c.drawCircle(point, 5, p);
+    final location = Icons.location_on;
 
-    final textStyle = TextStyle(
-      color: Colors.black,
-      fontSize: 15,
-    );
+    final textStyle = GoogleFonts.lato(fontSize: 13);
     final textSpan = TextSpan(
-      text: name,
-      style: textStyle,
+      text: String.fromCharCode(location.codePoint),
+      style: TextStyle(
+          fontSize: 18, fontFamily: location.fontFamily, color: Colors.black),
+      children: [
+        TextSpan(
+          text: name,
+          style: textStyle,
+        )
+      ],
     );
     final textPainter = TextPainter(
       text: textSpan,
       textDirection: TextDirection.ltr,
     );
     textPainter.layout();
-    final offset = Offset(point.dx + 5, point.dy + 5);
+    final offset = Offset(point.dx - 5, point.dy - 5);
     textPainter.paint(c, offset);
   }
 }

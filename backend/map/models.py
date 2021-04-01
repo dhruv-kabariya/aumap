@@ -24,6 +24,7 @@ class Buildings(models.Model):
     def __str__(self):
         return self.name
 
+
 class Structural(models.Model):
 
     # trigger
@@ -33,7 +34,8 @@ class Structural(models.Model):
                                   params={'value': value},)
 
     id = models.IntegerField(primary_key=True)
-    name = models.ForeignKey(Buildings, on_delete=models.CASCADE,related_name='structural')
+    name = models.ForeignKey(
+        Buildings, on_delete=models.CASCADE, related_name='structural')
     point = models.ForeignKey(
         Coordinate, on_delete=models.CASCADE, validators=[pointValidation])
 
