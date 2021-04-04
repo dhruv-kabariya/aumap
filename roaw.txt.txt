@@ -83,3 +83,23 @@ ST - 15 => 105 -102
 
 ST - 100 - 96
 
+
+class RouteService{
+
+  final String url = 'map/findroute/'
+
+  Future<List<Coordinate>> findRoute(LocationPoint start,LocationPoint end)async{
+    List<Coordinate> route = [];
+    String q = url + start.name + "/"+end.name;
+    await API.getrequest(q).then((value) {
+      List data = jsonDecode(value.body);
+      for (int i = 0; i < data.length; i++) {
+        locations.add(Coordinate.fromJson(data[i]));
+      }
+    });
+
+    return locations;
+  }
+
+}
+

@@ -1,17 +1,46 @@
 import 'package:aumap/bloc/Search/search_bloc.dart';
+import 'package:aumap/bloc/route/route_bloc.dart';
+import 'package:aumap/bloc/show_mark/showmark_bloc.dart';
 import 'package:aumap/screen/maprender.dart';
+import 'package:aumap/screen/searchDrawer.dart';
 import 'package:aumap/screen/searchbar.dart';
 import 'package:flutter/material.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   MainScreen({Key key}) : super(key: key);
+
+  @override
+  _MainScreenState createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
   SearchBloc bloc = SearchBloc();
+
+  ShowmarkBloc mark = ShowmarkBloc();
+  RouteBloc routeBloc = RouteBloc();
+
+  final GlobalKey<ScaffoldState> scaffold = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Scaffold(
+      key: scaffold,
+      drawer: SearchDetail(
+        scaffoldKey: scaffold,
+      ),
+      body: Container(
         child: Stack(
-      children: [MapRender(), SearchBar()],
-    ));
+          children: [
+            MapRender(bloc: mark, route: routeBloc),
+            SearchBar(
+              bloc: bloc,
+              loc: mark,
+              scaffoldkey: scaffold,
+              routeBloc: routeBloc,
+            )
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:aumap/models/converter.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -10,6 +11,7 @@ class LocationPoint {
   String website;
   String desciption;
   String marker;
+  bool highlight = false;
 
   LocationPoint(
       this.name, this.point, this.desciption, this.marker, this.website);
@@ -29,7 +31,9 @@ class LocationPoint {
     final textSpan = TextSpan(
       text: String.fromCharCode(location.codePoint),
       style: TextStyle(
-          fontSize: 18, fontFamily: location.fontFamily, color: Colors.black),
+          fontSize: 18,
+          fontFamily: location.fontFamily,
+          color: highlight ? Colors.red : Colors.black),
       children: [
         TextSpan(
           text: name,
@@ -42,7 +46,7 @@ class LocationPoint {
       textDirection: TextDirection.ltr,
     );
     textPainter.layout();
-    final offset = Offset(point.dx - 5, point.dy - 5);
+    final offset = Offset(point.dx, point.dy);
     textPainter.paint(c, offset);
   }
 }

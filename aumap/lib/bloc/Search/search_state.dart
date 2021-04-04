@@ -11,7 +11,7 @@ class SearchInitial extends SearchState {}
 class SeachingLocation extends SearchState {}
 
 class SearchedLocation extends SearchState {
-  LocationPoint location;
+  List<LocationPoint> location;
   SearchedLocation({
     @required this.location,
   });
@@ -19,8 +19,6 @@ class SearchedLocation extends SearchState {
   List<Object> get props => [location];
 }
 
-class NoSearchLocation extends SearchState {}
+class LocationDetailSearching extends SearchState {}
 
-class FindingRoute extends SearchState {}
-
-class FoundRoute extends SearchState {}
+class LocationDetailSearched extends SearchState {}

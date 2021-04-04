@@ -14,7 +14,7 @@ class Loadingmap extends LoadmapState {}
 class LoadedMap extends LoadmapState {
   List<Structural> buidings = [];
   List<Street> streets = [];
-  List<LocationPoint> locations = [];
+  List<LocationPoint> locations;
 
   LoadedMap(this.buidings, this.streets, this.locations);
 }

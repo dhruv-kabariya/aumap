@@ -51,11 +51,7 @@ class MyMap extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawColor(Colors.grey[200], BlendMode.color);
-
     final Paint p = Paint();
-    p.color = Colors.red;
-    p.strokeWidth = 1;
 
     for (int i = 0; i < buidings.length; i++) {
       buidings[i].buildStrucure(canvas, p);
@@ -64,53 +60,14 @@ class MyMap extends CustomPainter {
     for (int i = 0; i < streets.length; i++) {
       streets[i].buildStreet(canvas, p);
     }
+
     for (int i = 0; i < locations.length; i++) {
       locations[i].markLocation(canvas, p);
     }
-
-    // drawseas(canvas, p);
-    // drawsas(canvas, p);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return false;
-  }
-
-  Offset newxy(double x, double y) {
-    double nx = ((y - 72.55068) / 0.0043) * 1000;
-    double ny = ((x - 23.03864) / -0.00316) * 800;
-    return Offset(nx, ny);
-  }
-
-  void drawseas(Canvas c, Paint p) {
-    Offset tr = newxy(23.036837, 72.551791); //
-    Offset tl = newxy(23.037655, 72.551796);
-    Offset br = newxy(23.036854, 72.552561);
-    Offset bl = newxy(23.037655, 72.552393);
-    c.drawLine(tl, tr, p);
-    c.drawLine(tr, br, p);
-    c.drawLine(br, bl, p);
-    c.drawLine(bl, tl, p);
-  }
-
-  void drawsas(Canvas c, Paint p) {
-    Offset tl = newxy(23.037797, 72.553203); //
-    Offset tr = newxy(23.037819, 72.554352);
-    Offset br = newxy(23.037565, 72.554357);
-    Offset bl = newxy(23.037542, 72.553202);
-    List<Offset> points = [tl, tr, br, bl];
-    c.drawPoints(PointMode.polygon, points, p);
-    c.drawLine(points.last, points.first, p);
-    final TextStyle style = TextStyle(color: Colors.black, fontSize: 20);
-    final TextSpan text = TextSpan(text: "SAS", style: style);
-
-    final TextPainter paint = TextPainter(
-      text: text,
-      textDirection: TextDirection.ltr,
-      // maxLines: 2,
-    );
-    paint.layout();
-    paint.paint(c, newxy(23.037819, 72.554352));
   }
 }

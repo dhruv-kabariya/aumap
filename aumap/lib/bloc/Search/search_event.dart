@@ -6,8 +6,10 @@ abstract class SearchEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class SearchNone extends SearchEvent {}
+
 class SearchLocation extends SearchEvent {
-  String query;
+  final String query;
   SearchLocation({
     @required this.query,
   });
@@ -16,14 +18,13 @@ class SearchLocation extends SearchEvent {
   List<Object> get props => [query];
 }
 
-class FindRoute extends SearchEvent {
-  String startLocation;
-  String endLocation;
-  FindRoute({
-    @required this.startLocation,
-    @required this.endLocation,
+class LocationDetailsearch extends SearchEvent {
+  final LocationPoint location;
+
+  LocationDetailsearch({
+    @required this.location,
   });
 
   @override
-  List<Object> get props => [startLocation, endLocation];
+  List<Object> get props => [location];
 }
