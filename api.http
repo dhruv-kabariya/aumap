@@ -1,0 +1,54 @@
+POST http://127.0.0.1:8000/map/review/0
+Content-Type:application/json
+
+{
+    "user":"admin",
+    "text":"Great",
+    "star":3
+}
+
+###########################################################
+
+POST http://127.0.0.1:8000/map/like/3
+Content-Type:application/json
+
+{
+    "user":"dhruv"
+}
+
+
+##################################################
+
+DELETE http://127.0.0.1:8000/map/like/3
+Content-Type:application/json
+
+{
+    "user":"dhruv"
+}
+
+##################################################
+
+POST  http://127.0.0.1:8000/map/login
+Content-Type:application/json
+
+{
+    "username":"test-1",
+    "password":"dhruv@123"
+}
+
+
+##################################################
+
+POST  http://127.0.0.1:8000/map/signup
+Content-Type:application/json
+
+{
+    "username":"test-1",
+    "password":"dhruv@123",
+    "first_name":"Dhruv",
+    "last_name":"Kabariya",
+    "email":"mymail@mail.com"
+    
+}
+
+

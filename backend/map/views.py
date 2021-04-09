@@ -1,13 +1,17 @@
-from math import cos, asin, sqrt, pi
-
+import base64
+from datetime import datetime
+from math import cos, asin, e, sqrt, pi
+from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
+from django.contrib.auth import authenticate,login
 from django.http.response import HttpResponse
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Buildings, Coordinate, LocationPoint, Street, Structural
-from .serializers import Buildingsserializer, LatLongSerializer, LoactionPointSerializer, StreetSerializer, StructuralSerializer
+from .models import Buildings, Coordinate, Information, Like, LocationPoint, Pictures, Review, Street, Structural
+from .serializers import Buildingsserializer, InformationSerializer, LatLongSerializer, LoactionPointSerializer, LocationDetailSerializer, StreetSerializer, StructuralSerializer, UserSrializer
 # Create your views here.
 
 
@@ -119,3 +123,150 @@ class FindRoute(APIView):
 
         route = self.getRoute(start.point,end.point)
         return Response(LatLongSerializer(route,many=True).data)
+
+class LocationDetail(APIView):
+
+    def get(self,request,location):
+        
+        data = Review.objects.filter(location=location)
+        data = LocationDetailSerializer(data,many=True).data
+
+        return Response(data)
+
+    def post(self,request,location):
+
+        location_id=  location
+        data = request.data
+        review = Review.objects.create(
+            text = data.get("text"),
+            location = LocationPoint.objects.get(id=location_id),
+            star =data.get("star"),
+            user = User.objects.get(username= data.get("user"))
+        )
+        review.save()
+        
+        if("review_pic" in data):
+            image = data["review_pic"]
+            for im in image:
+                im = im["file_name"]
+                name = review.user.username +"_"+review.location.p_name
+                # print(image)
+                if(';base64,' in im):
+                    format, imgstr = im.split(';base64,')
+
+                    ext = format.split('/')[-1]
+                dataImage = ContentFile(base64.b64decode(
+                    im), name=name + str(datetime.now())+".jpeg")
+                
+                photo = Pictures(
+                    file_name = dataImage,
+                    user = User.objects.get(username= data.get("user")),
+                    review = review,
+                    location = LocationPoint.objects.get(id=location_id)
+                )
+
+                photo.save()
+
+        j_data = LocationDetailSerializer(review).data
+
+        return Response(j_data)
+
+class LikeView(APIView):
+
+    def post(self,request,review):
+
+        user = User.objects.get(username=request.data.get("user"))
+
+        like = Like.objects.create(
+            user = user,
+            review = Review.objects.get(
+                id=review
+            )
+        )
+
+        like.save()
+
+        return Response(
+            status=204
+        )
+
+    def delete(self,request,review):
+
+        user = User.objects.get(username=request.data.get("user"))
+
+        like = Like.objects.get(
+            user = user,
+            review = Review.objects.get(
+                id=review
+            )
+        )
+        like.delete()
+
+        return Response(
+            status=204
+        )
+
+class InformationView(APIView):
+
+    def get(self,request,location_id):
+
+        data = Information.objects.filter(location = location_id)
+     
+        today_wday = datetime.now().weekday() + 1
+        status_raw = Information.objects.get(weekday=today_wday,location = location_id)
+        status = False
+        if(datetime.now().time()  >= status_raw.openingtime  and datetime.now().time() <= status_raw.closingtime ):
+            status = True
+
+        
+        data = InformationSerializer(data,many=True).data
+        data = {
+            "status":status,
+            "data" : data
+        }
+
+        return Response(data)
+
+
+class Login(APIView):
+
+    def post(self,request):
+        username = request.data['username']
+        password = request.data['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            data = UserSrializer(User.objects.get(username = username)).data
+            return Response(data)
+        else:
+            
+            return Response(
+                
+                {
+                    "status":False,
+                    "error" : "Invalid User Name or Password"
+                }
+            )
+
+class SignUp(APIView):
+
+    def post(self,request):
+        username = request.data['username']
+        password = request.data['password']
+        first_name = request.data['first_name']
+        last_name = request.data['last_name']
+        email = request.data['email']
+        
+        user = User.objects.create_user(
+            username = username,
+            first_name = first_name,
+            last_name=last_name,
+            email =email,
+            password = password
+
+        )
+        user.save()
+        data = UserSrializer(user).data
+        return Response(
+            data
+        )
