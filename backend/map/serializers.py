@@ -30,13 +30,21 @@ class StrucPointSerializer(serializers.ModelSerializer):
         # depth=1
 
 
+class MarkerSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = Marker
+        fields = ["types", "icon","color"]
+
 class Buildingsserializer(serializers.ModelSerializer):
 
     structural = StrucPointSerializer(many=True, read_only=True)
+    marker = MarkerSerializer()
 
     class Meta:
         model = Buildings
-        fields = ['name', 'structural']
+        fields = ['name', 'structural','marker']
         depth = 1
 
 
@@ -70,12 +78,6 @@ class StreetSerializer(serializers.ModelSerializer):
         fields = ["name", "length", "start", "end"]
 
 
-class MarkerSerializer(serializers.ModelSerializer):
-
-    class Meta:
-
-        model = Marker
-        fields = ["types", "icon","color"]
 
 class PictureReviewSeralizer(serializers.ModelSerializer):
 
@@ -93,7 +95,7 @@ class LoactionPointSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = LocationPoint
-        fields = ["p_name", "point", "website", "desciption", "marker","avg_star","no_of_review","location_pic"]
+        fields = ["id","p_name", "point", "website", "desciption", "marker","phone","avg_star","no_of_review","location_pic"]
         depth = 1
 
 class UserReviewDataSerializer(serializers.ModelSerializer):
@@ -101,7 +103,7 @@ class UserReviewDataSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = User
-        fields = ["first_name","last_name"]
+        fields = ["first_name","last_name","username"]
 
 
 class LocationDetailSerializer(serializers.ModelSerializer):
@@ -112,7 +114,7 @@ class LocationDetailSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = Review
-        fields = ["text","total_like","user","review_pic"]
+        fields = ["id","text","total_like","user","star","review_pic"]
         
 class InformationSerializer(serializers.ModelSerializer):
 

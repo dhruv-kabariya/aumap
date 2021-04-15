@@ -4,11 +4,16 @@ from math import cos, asin, e, sqrt, pi
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.contrib.auth import authenticate,login
+from django.http import response
 from django.http.response import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 
 from .models import Buildings, Coordinate, Information, Like, LocationPoint, Pictures, Review, Street, Structural
 from .serializers import Buildingsserializer, InformationSerializer, LatLongSerializer, LoactionPointSerializer, LocationDetailSerializer, StreetSerializer, StructuralSerializer, UserSrializer
@@ -137,6 +142,7 @@ class LocationDetail(APIView):
 
         location_id=  location
         data = request.data
+        # print(data)
         review = Review.objects.create(
             text = data.get("text"),
             location = LocationPoint.objects.get(id=location_id),
@@ -171,45 +177,74 @@ class LocationDetail(APIView):
 
         return Response(j_data)
 
+@method_decorator(csrf_exempt,name="dispatch")
 class LikeView(APIView):
+
+    permission_classes = [AllowAny,]
+    def get(self,request):
+        return Response(
+             status=204
+        )
 
     def post(self,request,review):
 
         user = User.objects.get(username=request.data.get("user"))
 
-        like = Like.objects.create(
+        try:
+            like = Like.objects.get(
             user = user,
             review = Review.objects.get(
                 id=review
             )
-        )
+            )
+            like.delete()
 
-        like.save()
+        except :
+
+            like = Like.objects.create(
+                user = user,
+                review = Review.objects.get(
+                    id=review
+                )
+            )
+
+            like.save()
 
         return Response(
             status=204
         )
 
-    def delete(self,request,review):
-
+@method_decorator(csrf_exempt,name="dispatch")
+class LikeCheckView(APIView):
+    
+    def post(self,request,review):
         user = User.objects.get(username=request.data.get("user"))
-
-        like = Like.objects.get(
+        try:
+            like = Like.objects.get(
             user = user,
             review = Review.objects.get(
                 id=review
             )
-        )
-        like.delete()
+            )
+            if(like ):
+                return Response(
+                    status=204
+                )
+            else:
+                return Response(
+                status=203
+            )
 
-        return Response(
-            status=204
-        )
+        except :
+
+            return Response(
+                status=203
+            )
 
 class InformationView(APIView):
 
     def get(self,request,location_id):
-
+        # print(Information.objects.filter(location = location_id))
         data = Information.objects.filter(location = location_id)
      
         today_wday = datetime.now().weekday() + 1
@@ -228,13 +263,18 @@ class InformationView(APIView):
         return Response(data)
 
 
+@method_decorator(csrf_exempt,name="dispatch")
 class Login(APIView):
-
+    
+    permission_classes = [AllowAny,]
+    
+    
     def post(self,request):
         username = request.data['username']
         password = request.data['password']
         user = authenticate(request, username=username, password=password)
-        if user is not None:
+        print(user)
+        if user != None:
             login(request, user)
             data = UserSrializer(User.objects.get(username = username)).data
             return Response(data)
@@ -248,7 +288,9 @@ class Login(APIView):
                 }
             )
 
+@method_decorator(csrf_exempt,name='dispatch')
 class SignUp(APIView):
+    permission_classes = [AllowAny,]
 
     def post(self,request):
         username = request.data['username']
