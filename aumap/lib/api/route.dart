@@ -11,7 +11,6 @@ class RouteService {
       LocationPoint start, LocationPoint end) async {
     List<Coordinate> route = [];
     String q = url + start.name + "/" + end.name;
-    print(q);
     await API.getrequest(q).then((value) {
       List data = jsonDecode(value.body);
       for (int i = 0; i < data.length; i++) {

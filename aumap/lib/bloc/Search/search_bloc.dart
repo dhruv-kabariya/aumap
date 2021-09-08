@@ -39,7 +39,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       LocationDetailsearch event) async* {
     yield LocationDetailSearching();
 //call api
-    await Future.delayed(Duration(seconds: 2));
-    yield LocationDetailSearched();
+    // await Future.delayed(Duration(seconds: 2));
+    yield LocationDetailSearched(point: event.location);
   }
 }

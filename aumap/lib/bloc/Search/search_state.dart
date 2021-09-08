@@ -21,4 +21,11 @@ class SearchedLocation extends SearchState {
 
 class LocationDetailSearching extends SearchState {}
 
-class LocationDetailSearched extends SearchState {}
+class LocationDetailSearched extends SearchState {
+  final LocationPoint point;
+  LocationDetailSearched({
+    @required this.point,
+  });
+  @override
+  List<Object> get props => [point];
+}

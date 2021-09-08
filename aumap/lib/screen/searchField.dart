@@ -1,7 +1,9 @@
+import 'package:aumap/authentication/bloc/authentication_bloc.dart';
 import 'package:aumap/bloc/Search/search_bloc.dart';
 import 'package:aumap/bloc/route/route_bloc.dart';
 import 'package:aumap/bloc/show_mark/showmark_bloc.dart';
 import 'package:aumap/models/location_point.dart';
+import 'package:aumap/screen/detailview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,7 +20,7 @@ class SearchField extends StatelessWidget {
 
   final TextEditingController search = TextEditingController();
 
-  OverlayEntry searchResult;
+  AuthenticationBloc auth;
 
   void markLocation(LocationPoint p) {
     search.text = p.name;
@@ -27,12 +29,80 @@ class SearchField extends StatelessWidget {
     loc.add(HighLight(locationPoint: p));
   }
 
-  void showResult(BuildContext context) {
-    searchResult = OverlayEntry(builder: (context) {
-      return Positioned(
-        left: 10,
-        top: hight,
-        child: Card(
+  void sendQuery(String q) {
+    if (q.isEmpty) {
+      bloc.add(SearchNone());
+    } else {
+      bloc.add(SearchLocation(query: q));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    auth = BlocProvider.of<AuthenticationBloc>(context);
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 300,
+              // height: 60,
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(10)),
+              child: TextFormField(
+                controller: search,
+                onTap: () {
+                  // showResult(context);
+                },
+                onChanged: sendQuery,
+                decoration: InputDecoration(
+                    hintText: "Search Location",
+                    hintStyle:
+                        GoogleFonts.lato(fontSize: 18, color: Colors.grey),
+                    suffix: Icon(Icons.search)),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 5),
+              width: 1,
+              color: Colors.grey,
+            ),
+            BlocBuilder(
+              bloc: bloc,
+              builder: (context, state) {
+                return Container(
+                  width: 41,
+                  padding: EdgeInsets.all(5),
+                  child: state is SearchedLocation ||
+                          state is LocationDetailSearched
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.close,
+                            color: Colors.blue,
+                          ),
+                          onPressed: () {
+                            search.text = "";
+                            bloc.add(SearchNone());
+                            loc.add(LocationCancel());
+                          })
+                      : IconButton(
+                          icon: Icon(
+                            Icons.directions,
+                            color: Colors.blue,
+                          ),
+                          onPressed: iconAction),
+                );
+              },
+            ),
+          ],
+        ),
+
+        ////////////////// new card ///////////
+        Card(
           child: BlocBuilder(
               bloc: bloc,
 
@@ -40,12 +110,12 @@ class SearchField extends StatelessWidget {
               builder: (context, state) {
                 if (state is SearchInitial) {
                   return Container(
-                    height: 200,
-                    width: 350,
-                    padding: EdgeInsets.all(10),
-                    alignment: Alignment.center,
-                    child: Text("Search Location In Ahmedabad University"),
-                  );
+                      // height: 200,
+                      // width: 350,
+                      // padding: EdgeInsets.all(10),
+                      // alignment: Alignment.center,
+                      // child: Text("Search Location In Ahmedabad University"),
+                      );
                 }
                 if (state is SeachingLocation ||
                     state is LocationDetailSearching) {
@@ -84,84 +154,10 @@ class SearchField extends StatelessWidget {
                   }
                 }
                 if (state is LocationDetailSearched) {
-                  return Container(
-                    height: 700,
-                    width: 350,
-                    color: Colors.amber,
-                    child: Text("This is Working"),
-                  );
+                  return DetailView(location: state.point);
                 }
               }),
         ),
-      );
-    });
-
-    Overlay.of(context).insert(searchResult);
-  }
-
-  void sendQuery(String q) {
-    if (q.isEmpty) {
-      bloc.add(SearchNone());
-    } else {
-      bloc.add(SearchLocation(query: q));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          width: 300,
-          height: 60,
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-          child: TextFormField(
-            controller: search,
-            onTap: () {
-              showResult(context);
-            },
-            onChanged: sendQuery,
-            decoration: InputDecoration(
-                hintText: "Search Location",
-                hintStyle: GoogleFonts.lato(fontSize: 18, color: Colors.grey),
-                suffix: Icon(Icons.search)),
-          ),
-        ),
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 5),
-          width: 1,
-          color: Colors.grey,
-        ),
-        BlocBuilder(
-            bloc: bloc,
-            builder: (context, state) {
-              return Container(
-                width: 41,
-                padding: EdgeInsets.all(5),
-                child:
-                    state is SearchedLocation || state is LocationDetailSearched
-                        ? IconButton(
-                            icon: Icon(
-                              Icons.close,
-                              color: Colors.blue,
-                            ),
-                            onPressed: () {
-                              search.text = "";
-                              bloc.add(SearchNone());
-                              loc.add(LocationCancel());
-                              searchResult.remove();
-                            })
-                        : IconButton(
-                            icon: Icon(
-                              Icons.directions,
-                              color: Colors.blue,
-                            ),
-                            onPressed: iconAction),
-              );
-            })
       ],
     );
   }
@@ -180,73 +176,20 @@ class RouteField extends StatelessWidget {
   final TextEditingController startController = TextEditingController();
   final TextEditingController destinationController = TextEditingController();
 
+  // true for start and false for dest
+  bool usedController = true;
+
   LocationPoint start;
   LocationPoint destination;
   OverlayEntry searchResult;
 
   void markLocation(LocationPoint p) {
     startController.text = p.name;
-    searchResult.remove();
+    // searchResult.remove();
     start = p;
     if (destination != null) {
       routeBloc.add(SearchRoute(start: start, destination: destination));
     }
-  }
-
-  void showResult(BuildContext context, Function selectAction) {
-    searchResult = OverlayEntry(builder: (context) {
-      return Positioned(
-        left: 10,
-        top: hight,
-        child: Card(
-          child: Container(
-            height: 200,
-            width: 350,
-            child: BlocBuilder(
-                bloc: bloc,
-
-                // ignore: missing_return
-                builder: (context, state) {
-                  if (state is SearchInitial) {
-                    return Container(
-                      padding: EdgeInsets.all(10),
-                      alignment: Alignment.center,
-                      child: Text("Search Location In Ahmedabad University"),
-                    );
-                  }
-                  if (state is SeachingLocation) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (state is SearchedLocation) {
-                    if (state.location.isEmpty) {
-                      return Container(
-                        padding: EdgeInsets.all(10),
-                        alignment: Alignment.center,
-                        child:
-                            Text("No Location Found In Ahmedabad University"),
-                      );
-                    } else {
-                      return ListView.builder(
-                          itemCount: state.location.length,
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              onTap: () => selectAction(state.location[index]),
-                              title: Text(
-                                state.location[index].name,
-                              ),
-                            );
-                          });
-                    }
-                  }
-                }),
-          ),
-        ),
-      );
-    });
-
-    Overlay.of(context).insert(searchResult);
   }
 
   void sendQuery(String q) {
@@ -258,7 +201,7 @@ class RouteField extends StatelessWidget {
   }
 
   void sendRouteQuery(LocationPoint dest) {
-    searchResult.remove();
+    // searchResult.remove();
     destination = dest;
     destinationController.text = dest.name;
     if (start != null) {
@@ -283,16 +226,8 @@ class RouteField extends StatelessWidget {
               child: TextFormField(
                 controller: startController,
                 onTap: () {
-                  if (Overlay.of(context).mounted) {
-                    try {
-                      searchResult.remove();
-                    } catch (e) {
-                      // print(Overlay.of(context).)
-                      print(Overlay.of(context).mounted);
-                      print("error");
-                    }
-                  }
-                  showResult(context, markLocation);
+                  usedController = true;
+                  // showResult(context, markLocation);
                 },
                 onChanged: sendQuery,
                 decoration: InputDecoration(
@@ -332,16 +267,8 @@ class RouteField extends StatelessWidget {
               child: TextFormField(
                 controller: destinationController,
                 onTap: () {
-                  if (Overlay.of(context).mounted) {
-                    try {
-                      searchResult.remove();
-                    } catch (e) {
-                      // print(Overlay.of(context).)
-                      print(Overlay.of(context).mounted);
-                      print("error");
-                    }
-                  }
-                  showResult(context, sendRouteQuery);
+                  usedController = false;
+                  // showResult(context, sendRouteQuery);
                 },
                 onChanged: sendQuery,
                 decoration: InputDecoration(
@@ -357,6 +284,53 @@ class RouteField extends StatelessWidget {
               color: Colors.grey,
             ),
           ],
+        ),
+        Container(
+          // width: 300,
+          child: BlocBuilder(
+              bloc: bloc,
+
+              // ignore: missing_return
+              builder: (context, state) {
+                if (state is SearchInitial) {
+                  return Container(
+                      // padding: EdgeInsets.all(10),
+                      // alignment: Alignment.center,
+                      // child: Text("Search Location In Ahmedabad University"),
+                      );
+                }
+                if (state is SeachingLocation) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (state is SearchedLocation) {
+                  if (state.location.isEmpty) {
+                    return Container(
+                      padding: EdgeInsets.all(10),
+                      alignment: Alignment.center,
+                      child: Text("No Location Found In Ahmedabad University"),
+                    );
+                  } else {
+                    return Container(
+                      height: 200,
+                      width: 350,
+                      child: ListView.builder(
+                          itemCount: state.location.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              onTap: () => usedController
+                                  ? markLocation(state.location[index])
+                                  : sendRouteQuery(state.location[index]),
+                              title: Text(
+                                state.location[index].name,
+                              ),
+                            );
+                          }),
+                    );
+                  }
+                }
+              }),
         ),
       ],
     );

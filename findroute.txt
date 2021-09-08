@@ -1,0 +1,154 @@
+def get_cor(self,from_cor,check):
+        coor = []
+        for i in Street.objects.filter(start=from_cor):
+            if(i.end not in check  ):
+                coor.append(i.end)
+        for i in Street.objects.filter(end=from_cor):
+            if(i.start not in check):
+                coor.append(i.start)
+        return coor
+
+final_route = [start]
+
+
+        reachable = self.get_cor(start,final_route)
+        find_or_not = False
+        while not find_or_not:
+                
+            min_d = 10**6
+            min_c= None
+        
+
+            for i in reachable:
+                if(LocationPoint.objects.filter(point = i) ):
+                    if( i == end):
+                        dis = distance(i,end)
+                    else:
+                        continue
+                else:
+                    dis = distan
+
+
+---------------------------------------------------------------------------------------------------
+
+
+DELIMITER && 
+drop procedure if exists find_route();
+create procedure find_route(start_id int,end_id int)
+declare find_or_not boolean;
+declare min_d float;
+declare min_c int;
+
+declare end_lat float;
+declare end_lon float;
+
+declare temp_lat float;
+declare temp_lon float;
+declare temp_is int;
+
+declare temp_dis float;
+
+begin
+	set @min_d:=1000000;
+	set  find_or_not:=true;
+	drop table if exists shortest_path
+	CREATE TEMPORARY TABLE shortest_path
+        SELECT * FROM coordinates where id=start_id;
+
+	drop table if exists near_coor
+	CREATE TEMPORARY TABLE near_coor;
+
+    set @end_lat = select lattitude from coordinates where id= end_id;
+    set @end_lon = select longitude from coordinates where id= end_id;
+    
+
+    SELECT near_para(start_id);
+
+    declare cur_fetch_coor CURSOR FOR select * from near_coor;
+	
+
+	WHILE find_or_not is true do
+       open cur_fetch_coor; 
+        checkLoop: LOOP
+			fetch cur_fetch_coor into rec_coor;
+            
+            set @temp_is = select id from coordinates where id = rec_coor;
+            set @temp_lat = select lattitude from coordinates where id = rec_coor;
+            set @temp_lon = select longitude from coordinates where id = rec_coor;
+
+
+            if exists( select * from locationpoint where id = temp_is) then
+
+                if(temp_is = end_id) then
+                    set @temp_dis = SELECT distance(temp_lat,temp_lon,end_lat,end_lon);
+                else
+                    continue
+                end if;
+            else
+                set @temp_dis = SELECT distance(temp_lat,temp_lon,end_lat,end_lon);
+                
+            if(temp_dis < min_d) then  
+                set min_d := temp_dis;
+                set min_c := temp_is;
+
+            if(min_c = end_id) then
+                set @find_or_not = False;
+            
+            close cur_fetch_coor;
+        end loop;
+        
+        SELECT near_para(start_id);
+
+        declare cur_fetch_coor CURSOR FOR select * from near_coor;
+	
+
+    END WHILE;
+        
+
+     
+end &&;
+
+
+delimiter //
+drop function if near_para(coor int);
+create function near_para(coor int) return void DETERMINISTIC
+BEGIN 
+
+delete from table near_coor;
+
+INSERT into near_coor  SELECT end FROM street WHERE street.start = coor AND NOT IN ( SELECT id FROM  shortest_path);
+
+INSERT into near_coor  SELECT start FROM street WHERE street.end = coor AND NOT IN ( SELECT id FROM  shortest_path);
+
+
+end;
+//
+
+
+delimiter //
+drop trigger if exists user_already_exist;
+create  trigger user_already_exist before insert on login for each row
+begin
+	DECLARE done INT DEFAULT FALSE; 
+	declare flag int default 0;
+	declare rec_username varchar(50);
+	declare cur_fetch_coor CURSOR FOR select * from near_coor;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+	
+	open cur_fetch_coor;
+		checkLoop: LOOP
+			fetch cur_fetch_coor into rec_coor;
+			if done then
+				leave checkLoop;
+			end if;
+			distance(
+				
+			
+		
+		end loop;
+	close cur_usernames;
+	if(flag=1) then
+		signal sqlstate '45002'
+		set message_text='Username already exists please enter unique username';
+	end if;
+end //

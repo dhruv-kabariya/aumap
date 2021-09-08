@@ -28,62 +28,6 @@ class SearchBar extends StatelessWidget {
     // }
   }
 
-  void showResult(BuildContext context, double height) {
-    searchResult = OverlayEntry(builder: (context) {
-      return Positioned(
-        left: 10,
-        top: height,
-        child: Card(
-          child: Container(
-            height: 200,
-            width: 350,
-            child: BlocBuilder(
-                bloc: bloc,
-
-                // ignore: missing_return
-                builder: (context, state) {
-                  if (state is SearchInitial) {
-                    return Container(
-                      padding: EdgeInsets.all(10),
-                      alignment: Alignment.center,
-                      child: Text("Search Location In Ahmedabad University"),
-                    );
-                  }
-                  if (state is SeachingLocation) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (state is SearchedLocation) {
-                    if (state.location.isEmpty) {
-                      return Container(
-                        padding: EdgeInsets.all(10),
-                        alignment: Alignment.center,
-                        child:
-                            Text("No Location Found In Ahmedabad University"),
-                      );
-                    } else {
-                      return ListView.builder(
-                          itemCount: state.location.length,
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              onTap: () => markLocation(state.location[index]),
-                              title: Text(
-                                state.location[index].name,
-                              ),
-                            );
-                          });
-                    }
-                  }
-                }),
-          ),
-        ),
-      );
-    });
-
-    Overlay.of(context).insert(searchResult);
-  }
-
   void sendQuery(String q) {
     if (q.isEmpty) {
       bloc.add(SearchNone());
@@ -110,6 +54,8 @@ class SearchBar extends StatelessWidget {
                   child: RouteField(
                     hight: 145,
                     iconAction: () {
+                      bloc.add(SearchNone());
+
                       routeBloc.add(RouteCancel());
                       searchRouteCubit.search();
                     },
@@ -122,6 +68,8 @@ class SearchBar extends StatelessWidget {
                   child: SearchField(
                     hight: 75,
                     iconAction: () {
+                      bloc.add(SearchNone());
+
                       searchRouteCubit.route();
                     },
                     bloc: bloc,

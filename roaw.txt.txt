@@ -1,105 +1,93 @@
-seas gate 2 - 86
-23.037606885248984, 72.5524023647036
 
-seas gate 1
-23.037563602818373, 72.55178491819123
+DELIMITER && 
+drop procedure if exists find_route();
+create procedure find_route(start_id int,end_id int)
+declare find_or_not boolean;
+declare min_d float;
+declare min_c int;
 
+declare end_lat float;
+declare end_lon float;
 
-seas gate3
-23.036850262516634, 72.55227308045328
+declare temp_lat float;
+declare temp_lon float;
+declare temp_is int;
 
+declare temp_dis float;
 
-AU gate 7
-23.03586046623554, 72.55247692818168
+begin
+	set @min_d:=1000000;
+	set  find_or_not:=true;
+	drop table if exists shortest_path
+	CREATE TEMPORARY TABLE shortest_path
+        SELECT * FROM coordinates where id=start_id;
 
-sas gate1
-23.03780803354874, 72.55347751617359
+	drop table if exists near_coor
+	CREATE TEMPORARY TABLE near_coor;
 
-sas gate2
-23.03781357730009, 72.5539759553333
+    set @end_lat = select lattitude from coordinates where id= end_id;
+    set @end_lon = select longitude from coordinates where id= end_id;
+    
 
+    SELECT near_para(start_id);
 
-sas gate3
-23.037673451863487, 72.55320284749723
+    declare cur_fetch_coor CURSOR FOR select * from near_coor;
+	
 
-bionest gate
-98
-
-
-intersection
-
-23.036538040263462, 72.55085947396213 = 93
-23.036676270273343, 72.55175532860522 = 94
-
-23.037515494433304, 72.55176069120017 = 95
-
-23.03770802235762, 72.55174459741747 = 96
-
-23.0367009532859, 72.55238296338534 = 97
-
-23.036083874787522, 72.55264045579558 = 98
-
-23.0367305729647, 72.55269946406895 = 99
-
-23.037737815562146, 72.55248518168588=100
-
-23.037768841625727, 72.55306812942518 = 101
-
-23.038782956917604, 72.55296561791928==102
-
-23.036801888748315, 72.55313540155926 = 103
+	WHILE find_or_not is true do
+       open cur_fetch_coor; 
+        checkLoop: LOOP
+			fetch cur_fetch_coor into rec_coor;
+            
+            set @temp_is = select id from coordinates where id = rec_coor;
+            set @temp_lat = select lattitude from coordinates where id = rec_coor;
+            set @temp_lon = select longitude from coordinates where id = rec_coor;
 
 
-23.03756333706918, 72.55251055815263 == 104
+            if exists( select * from locationpoint where id = temp_is) then
 
-23.036785820436567, 72.55314892327719=  105
+                if(temp_is = end_id) then
+                    set @temp_dis = SELECT distance(temp_lat,temp_lon,end_lat,end_lon);
+                else
+                    continue
+                end if;
+            else
+                set @temp_dis = SELECT distance(temp_lat,temp_lon,end_lat,end_lon);
+                
+            if(temp_dis < min_d) then  
+                set min_d := temp_dis;
+                set min_c := temp_is;
 
-23.037905335525657, 72.55304709732009 = 106 == arbo gate1
+            if(min_c = end_id) then
+                set @find_or_not = False;
+            
+            close cur_fetch_coor;
+        end loop;
+        
+        SELECT near_para(start_id);
 
-23.037864361829925, 72.55345736305495 = 107 
-23.03787528658218, 72.55349821916845
+        declare cur_fetch_coor CURSOR FOR select * from near_coor;
+	
 
-street -1 = 93 - 94
-street -2 = 94 - 95
-street -3 = 95 - gate-2 = 87
-street -4 = 95 - 96
-street -5 = 94 - 97
-street -6 = 97 - gate-3 = 88
-street -7 = 97 - AU gate-7 = 89
-street -8 = 97 - 99
-STREET - 9 => 99 - 104
-STREET11 -> 104 -100
+    END WHILE;
+        
 
-street -12 = 100 - 101
-street -13 = 101 - 102
-
-street => 17 101 - 106
-street =18 106 - 102
-street = 19 106 - 107
-street =20 107 - sas gate 1 = 90
-
-STREET - 14 => 99 - 105
-ST - 15 => 105 -102
-
-ST - 100 - 96
+     
+end &&;
 
 
-class RouteService{
+delimiter //
+drop function if near_para(coor int);
+create function near_para(coor int) return void DETERMINISTIC
+BEGIN 
 
-  final String url = 'map/findroute/'
+delete from table near_coor;
 
-  Future<List<Coordinate>> findRoute(LocationPoint start,LocationPoint end)async{
-    List<Coordinate> route = [];
-    String q = url + start.name + "/"+end.name;
-    await API.getrequest(q).then((value) {
-      List data = jsonDecode(value.body);
-      for (int i = 0; i < data.length; i++) {
-        locations.add(Coordinate.fromJson(data[i]));
-      }
-    });
+INSERT into near_coor  SELECT end FROM street WHERE street.start = coor AND NOT IN ( SELECT id FROM  shortest_path);
 
-    return locations;
-  }
+INSERT into near_coor  SELECT start FROM street WHERE street.end = coor AND NOT IN ( SELECT id FROM  shortest_path);
 
-}
+
+end;
+//
 

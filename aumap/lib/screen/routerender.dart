@@ -41,8 +41,9 @@ class Location extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint p = Paint();
-    p.color = Colors.blue;
-    p.strokeWidth = 3;
+    p.color = Colors.lightBlueAccent;
+    p.strokeWidth = 8;
+    p.strokeCap = StrokeCap.round;
     canvas.drawPoints(PointMode.polygon, route.map((e) => e.point).toList(), p);
     // canvas.drawLine(route.last.point, route.first.point, p);
   }

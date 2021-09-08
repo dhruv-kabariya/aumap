@@ -1,3 +1,4 @@
+import 'package:aumap/authentication/bloc/authentication_bloc.dart';
 import 'package:aumap/bloc/Search/search_bloc.dart';
 import 'package:aumap/bloc/route/route_bloc.dart';
 import 'package:aumap/bloc/show_mark/showmark_bloc.dart';
@@ -5,6 +6,7 @@ import 'package:aumap/screen/maprender.dart';
 import 'package:aumap/screen/searchDrawer.dart';
 import 'package:aumap/screen/searchbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainScreen extends StatefulWidget {
   MainScreen({Key key}) : super(key: key);
@@ -20,9 +22,12 @@ class _MainScreenState extends State<MainScreen> {
   RouteBloc routeBloc = RouteBloc();
 
   final GlobalKey<ScaffoldState> scaffold = GlobalKey<ScaffoldState>();
+  AuthenticationBloc auth;
 
   @override
   Widget build(BuildContext context) {
+    auth = BlocProvider.of<AuthenticationBloc>(context);
+
     return Scaffold(
       key: scaffold,
       drawer: SearchDetail(
